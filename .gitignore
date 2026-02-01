@@ -1,0 +1,22 @@
+# Build artifacts
+/build/
+**/build/
+*.cmake.user
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln
+*.vcxproj*
+
+# macOS
+.DS_Store
+
+# JUCE
+JuceLibraryCode/
