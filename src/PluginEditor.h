@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
+#include "ui/components/MeterComponent.h"
 
 /**
   ProGainAudioProcessorEditor
@@ -23,6 +24,13 @@ public:
   void resized() override;
 
 private:
+  void configureRotaryControl(
+    juce::Slider& slider,
+    juce::Label& label,
+    const juce::String& labelText,
+    juce::Colour fillColour);
+  void refreshPresetList();
+
   ProGainAudioProcessor& processor;
 
   juce::Slider gainSlider;
@@ -39,7 +47,6 @@ private:
   juce::TextButton deletePresetButton { "Delete" };
   juce::ComboBox presetList;
 
-  class MeterComponent;
   std::unique_ptr<MeterComponent> meter;
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ProGainAudioProcessorEditor)

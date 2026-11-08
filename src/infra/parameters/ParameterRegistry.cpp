@@ -16,7 +16,7 @@ namespace
 {
 const std::vector<ParamSpec> kParams = {
   {
-    "gain",
+    kGainId,
     "Gain",
     0.0f,
     2.0f,
@@ -27,7 +27,7 @@ const std::vector<ParamSpec> kParams = {
     0.02f
   },
   {
-    "trim",
+    kTrimId,
     "Output Trim",
     -12.0f,
     12.0f,

@@ -63,7 +63,6 @@ juce_add_plugin(ProGain
   NEEDS_MIDI_OUTPUT FALSE
   IS_MIDI_EFFECT FALSE
   EDITOR_WANTS_KEYBOARD_FOCUS FALSE
-  BUNDLE_ID "com.abeaudio.progain"
 )
 
 juce_generate_juce_header(ProGain)
@@ -78,6 +77,8 @@ set(SOURCES
   src/infra/parameters/ParameterRegistry.h
   src/infra/state/PresetStore.cpp
   src/infra/state/PresetStore.h
+  src/ui/components/MeterComponent.cpp
+  src/ui/components/MeterComponent.h
 )
 
 target_sources(ProGain PRIVATE ${SOURCES})

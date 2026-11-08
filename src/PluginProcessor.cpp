@@ -15,8 +15,16 @@
 #include "infra/parameters/ParameterRegistry.h"
 
 namespace {
-constexpr const char* kParamGainId = "gain";
-constexpr const char* kParamTrimId = "trim";
+void resetSmoothedParameter(
+    juce::SmoothedValue<float, juce::ValueSmoothingTypes::Linear>& smoothed,
+    const ProGainAudioProcessor::APVTS& apvts,
+    const char* paramId,
+    double sampleRate) {
+    const auto* spec = params::find(paramId);
+    smoothed.reset(sampleRate, spec ? spec->smoothingSeconds : 0.02f);
+    if (const auto* param = apvts.getRawParameterValue(paramId))
+        smoothed.setCurrentAndTargetValue(param->load());
+}
 }  // namespace
 
 ProGainAudioProcessor::ProGainAudioProcessor()
@@ -44,18 +52,8 @@ const juce::String ProGainAudioProcessor::getProgramName(int) { return {}; }
 void ProGainAudioProcessor::changeProgramName(int, const juce::String&) {}
 
 void ProGainAudioProcessor::prepareToPlay(double sampleRate, int) {
-    // Smoothing time (seconds) for gain changes.
-    const auto* spec = params::find(kParamGainId);
-    gainSmoothed.reset(sampleRate, spec ? spec->smoothingSeconds : 0.02f);
-    const auto* gainParam = apvts.getRawParameterValue(kParamGainId);
-    gainSmoothed.setCurrentAndTargetValue(gainParam->load());
-
-    const auto* trimSpec = params::find(kParamTrimId);
-    trimSmoothed.reset(sampleRate,
-                       trimSpec ? trimSpec->smoothingSeconds : 0.02f);
-    const auto* trimParam = apvts.getRawParameterValue(kParamTrimId);
-    trimSmoothed.setCurrentAndTargetValue(trimParam->load());
-
+    resetSmoothedParameter(gainSmoothed, apvts, params::kGainId, sampleRate);
+    resetSmoothedParameter(trimSmoothed, apvts, params::kTrimId, sampleRate);
     meterLevel.store(0.0f);
 }
 
@@ -81,17 +79,14 @@ void ProGainAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     const int numChannels = buffer.getNumChannels();
 
     // Atomically read the parameter once per block, then smooth per-sample.
-    const auto* gainParam = apvts.getRawParameterValue(kParamGainId);
+    const auto* gainParam = apvts.getRawParameterValue(params::kGainId);
     gainSmoothed.setTargetValue(gainParam->load());
-    const auto* trimParam = apvts.getRawParameterValue(kParamTrimId);
+    const auto* trimParam = apvts.getRawParameterValue(params::kTrimId);
     trimSmoothed.setTargetValue(trimParam->load());
 
     float blockPeak = 0.0f;
-    // Cache channel pointers once to avoid repeated lookups in the inner loop.
-    std::vector<float*> channelData;
-    channelData.reserve((size_t)numChannels);
-    for (int ch = 0; ch < numChannels; ++ch)
-        channelData.push_back(buffer.getWritePointer(ch));
+    // Use JUCE's pre-allocated array of write pointers to avoid any audio-thread heap allocation.
+    float* const* channelData = buffer.getArrayOfWritePointers();
 
     for (int sample = 0; sample < numSamples; ++sample) {
         const float g = gainSmoothed.getNextValue();
@@ -99,7 +94,7 @@ void ProGainAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
         const float trim = juce::Decibels::decibelsToGain(trimDb);
         const float total = g * trim;
         for (int ch = 0; ch < numChannels; ++ch) {
-            float* data = channelData[(size_t)ch];
+            float* data = channelData[ch];
             const float v = data[sample] * total;
             data[sample] = v;
             blockPeak = juce::jmax(blockPeak, std::abs(v));

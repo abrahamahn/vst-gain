@@ -15,6 +15,9 @@
 */
 namespace params
 {
+constexpr const char* kGainId = "gain";
+constexpr const char* kTrimId = "trim";
+
 struct ParamSpec
 {
   const char* id;
