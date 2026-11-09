@@ -23,7 +23,7 @@ option(USE_GPU_AUDIO_SDK "Enable GPU Audio SDK (requires vendor SDK)" OFF)
 option(USE_SQLITE "Enable SQLite preset storage" ON)
 set(SKIA_SDK_PATH "" CACHE PATH "Path to Skia SDK (if USE_SKIA=ON)")
 set(GPU_AUDIO_SDK_PATH "" CACHE PATH "Path to GPU Audio SDK (if USE_GPU_AUDIO_SDK=ON)")
-set(JUCE_VERSION "8.0.0" CACHE STRING "JUCE version tag")
+set(JUCE_VERSION "8.0.12" CACHE STRING "JUCE version tag")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(CPM)
