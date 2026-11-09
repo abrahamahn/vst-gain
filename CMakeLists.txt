@@ -10,7 +10,7 @@ cmake_minimum_required(VERSION 3.20)
 project(ProGain
   VERSION 0.1.0
   DESCRIPTION "JUCE VST/AU/Standalone boilerplate"
-  LANGUAGES CXX
+  LANGUAGES C CXX
 )
 
 set(CMAKE_CXX_STANDARD 17)
